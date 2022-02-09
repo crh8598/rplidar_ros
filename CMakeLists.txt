@@ -15,15 +15,39 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rosconsole
   sensor_msgs
+  angles
+  eigen_conversions
+  mavros
+  mavros_extras
+  std_msgs
+  tf2_ros
+)
+find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(Eigen3)
+if(NOT EIGEN3_FOUND)
+  # Fallback to cmake_modules
+  find_package(cmake_modules REQUIRED)
+  find_package(Eigen REQUIRED)
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+  set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})
+endif()
+
+# CATKIN_DEPENDS 를 통해 빌드에 필요한 catkin package를 포함하도록 함.
+catkin_package(
+  CATKIN_DEPENDS control_toolbox eigen_conversions geometry_msgs mavros mavros_extras roscpp std_msgs tf2_ros
+  DEPENDS Boost
 )
 
 include_directories(
+  # for mavros
+  ${Boost_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  # end
   ${RPLIDAR_SDK_PATH}/include
   ${RPLIDAR_SDK_PATH}/src
   ${catkin_INCLUDE_DIRS}
 )
-
-catkin_package()
 
 add_executable(rplidarNode src/node.cpp ${RPLIDAR_SDK_SRC})
 target_link_libraries(rplidarNode ${catkin_LIBRARIES})
